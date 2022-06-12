@@ -17,7 +17,13 @@ decaf/
 submission/
 cfg/
 darknet
+libdarknet.a
+libdarknet.so
 .fuse*
+
+# darknet automotive
+weights/
+OIS/
 
 # OS Generated #
 .DS_Store*
