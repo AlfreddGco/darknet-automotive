@@ -1,6 +1,7 @@
 from ctypes import *
 import math
 import random
+import time 
 
 def sample(probs):
     s = sum(probs)
@@ -45,7 +46,7 @@ class METADATA(Structure):
     
 
 #lib = CDLL("/home/pjreddie/documents/darknet/libdarknet.so", RTLD_GLOBAL)
-lib = CDLL("libdarknet.so", RTLD_GLOBAL)
+lib = CDLL("./libdarknet.so", RTLD_GLOBAL)
 lib.network_width.argtypes = [c_void_p]
 lib.network_width.restype = c_int
 lib.network_height.argtypes = [c_void_p]
@@ -148,9 +149,12 @@ if __name__ == "__main__":
     #meta = load_meta("cfg/imagenet1k.data")
     #r = classify(net, meta, im)
     #print r[:10]
-    net = load_net("cfg/tiny-yolo.cfg", "tiny-yolo.weights", 0)
-    meta = load_meta("cfg/coco.data")
-    r = detect(net, meta, "data/dog.jpg")
+
+    net = load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
+    meta = load_meta(b"cfg/ois.data")
+    start = time.time()
+    r = detect(net, meta, b"data/stop.jpg")
     print(r)
+    print("Detection time: %.3f seconds" % (time.time() - start))
     
 
