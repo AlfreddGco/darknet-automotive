@@ -1,0 +1,5 @@
+classes = 4
+train  = OIS/train.txt
+valid  = OIS/valid.txt
+names = data/ois.names
+backup = backup
