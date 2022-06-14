@@ -626,7 +626,10 @@ image make_random_image(int w, int h, int c)
 image float_to_image(int w, int h, int c, float *data)
 {
     image out = make_empty_image(w,h,c);
-    out.data = data;
+    float *data_copy = calloc(w*h*c, sizeof(float));
+    memmove(data_copy, data, sizeof(float)*w*h*c);
+    out.data = data_copy;
+    // out.data = data;
     return out;
 }
 
