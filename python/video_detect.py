@@ -178,13 +178,9 @@ def probability_filter(detections):
 
 def resize_img(frame):
     h, w, c = frame.shape
-    print(frame.shape)
     frame = frame[h//3:]
-    print(frame.shape)
-    fraction = w*2//5
-    fraction = (frame.shape[0] // 2)
-    frame = np.concatenate((frame[:,:fraction] + frame[:,-fraction:]), axis=1)
-    print(frame.shape)
+    fr = (frame.shape[0] // 2)
+    frame = np.concatenate((frame[:,:fr], frame[:,-fr:]), axis=1)
     frame = cv2.resize(frame, (416, 416))
     return frame
 
@@ -210,7 +206,6 @@ if __name__ == "__main__":
         # cv2.waitKey(1)
         h, w, c = frame.shape
         frame = resize_img(frame)
-        exit()
         img = cv_img_to_darknet_img(frame)
         r = detect(net, meta, img)
         r = probability_filter(r)
