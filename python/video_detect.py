@@ -112,10 +112,6 @@ predict_image = lib.network_predict_image
 predict_image.argtypes = [c_void_p, IMAGE]
 predict_image.restype = POINTER(c_float)
 
-mat_to_image = lib.mat_to_image
-# mat_to_image.argtypes = [lib.Mat]
-mat_to_image.restype = IMAGE
-
 def classify(net, meta, im):
     out = predict_image(net, im)
     res = []
@@ -157,17 +153,27 @@ def opencv_img_to_darknet_img(img):
     darknet_img = float_to_image(w, h, c, c_pointer)
     return darknet_img
 
+
 if __name__ == "__main__":
     net = load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
     meta = load_meta(b"cfg/ois.data")
 
     cap = cv2.VideoCapture('data/stop_video.mp4')
+    frames = 0
     start = time.time()
     while cap.isOpened():
         ret, frame = cap.read()
-        if(frame is not None):
+        if(ret):
+            frames += 1
             img = opencv_img_to_darknet_img(frame)
             r = detect(net, meta, img)
-    print("Detection time: %.3f seconds" % (time.time() - start))
+            if(frames % 30 == 0):
+                print(r)
+        else:
+            break
+
+    elapsed = time.time() - start
+    cap.release()    
+    print("Detection time: %.3f seconds. %d FPS" % (elapsed, frames // elapsed))
     
 
