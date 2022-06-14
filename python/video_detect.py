@@ -148,6 +148,7 @@ def detect(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
     return out
 
 
+#6.4ms on average for image with shape (416,416,3)
 def cv_img_to_darknet_img(img):
     h, w, c = img.shape
 
@@ -177,7 +178,7 @@ def probability_filter(detections):
 
 
 def resize_img(frame):
-    h, w, c = frame.shape
+    h = frame.shape[0]
     frame = frame[h//3:]
     fr = (frame.shape[0] // 2)
     frame = np.concatenate((frame[:,:fr], frame[:,-fr:]), axis=1)
@@ -216,4 +217,5 @@ if __name__ == "__main__":
 
     timer.stop()
     print("Detection time: {:.3f} seconds. {:.2f} FPS".format(timer.elapsed(), timer.fps()))
+    # print("Conversion average: {:.4f}".format(sum(conversion_times)/len(conversion_times)))
 
