@@ -6,21 +6,6 @@ from imutils.video import FPS, FileVideoStream
 
 import darknet as dn
 
-# conversion_times = []
-# #6.4ms on average for image with shape (416,416,3)
-# def cv_img_to_darknet_img(img):
-#     start = time.time()
-#     h, w, c = img.shape
-#     gpu_frame = cv2.cuda_GpuMat(img)
-#     gpu_frame = gpu_frame.transpose(2, 0, 1)[::-1]
-#     gpu_frame = gpu_frame.astype(c_float)
-#     gpu_frame = (gpu_frame / 255).flatten()
-#     c_pointer = gpu_frame.ctypes.data_as(POINTER(c_float))
-#     darknet_img = dn.float_to_image(w, h, c, c_pointer)
-#     conversion_times.append(time.time() - start)
-#     return darknet_img
-
-
 def probability_filter(detections):
     detections = pydash.arrays.uniq_by(detections, lambda x: x['label'])
     filtered = []

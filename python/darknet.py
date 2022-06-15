@@ -141,7 +141,7 @@ def detect(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
         for i in range(meta.classes):
             if dets[j].prob[i] > 0:
                 b = dets[j].bbox
-                res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
+                res.append((meta.names[i].decode(), dets[j].prob[i], (b.x, b.y, b.w, b.h)))
     res = sorted(res, key=lambda x: -x[1])
     out = []
     for detection in res:
@@ -158,23 +158,7 @@ def detect(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
 
 def detect_from_file(net, meta, filename, thresh=.5, hier_thresh=.5, nms=.45):
     im = load_image(filename, 0, 0)
-    num = c_int(0)
-    pnum = pointer(num)
-    predict_image(net, im)
-    dets = get_network_boxes(net, im.w, im.h, thresh, hier_thresh, None, 0, pnum)
-    num = pnum[0]
-    if (nms): do_nms_obj(dets, num, meta.classes, nms);
-
-    res = []
-    for j in range(num):
-        for i in range(meta.classes):
-            if dets[j].prob[i] > 0:
-                b = dets[j].bbox
-                res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
-    res = sorted(res, key=lambda x: -x[1])
-    free_image(im)
-    free_detections(dets, num)
-    return res
+    return detect(net, meta, im, thresh, hier_thresh, nms)
 
 
 #6.4ms on average for image with shape (416,416,3)
@@ -192,17 +176,9 @@ def cv_img_to_darknet_img(img):
 
 
 if __name__ == "__main__":
-    #net = load_net("cfg/densenet201.cfg", "/home/pjreddie/trained/densenet201.weights", 0)
-    #im = load_image("data/wolf.jpg", 0, 0)
-    #meta = load_meta("cfg/imagenet1k.data")
-    #r = classify(net, meta, im)
-    #print r[:10]
-
     net = load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
     meta = load_meta(b"cfg/ois.data")
     start = time.time()
     r = detect(net, meta, b"data/stop.jpg")
     print(r)
     print("Detection time: %.3f seconds" % (time.time() - start))
-    
-
