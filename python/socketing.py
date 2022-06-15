@@ -1,6 +1,5 @@
 import struct
 
-TCP_IP = 'localhost'
 TCP_PORT = 5001
 
 def recv_variable_length(socket):

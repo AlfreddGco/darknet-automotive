@@ -3,7 +3,7 @@ import socket, time
 import cv2, json
 import numpy as np
 from socketing import recv_variable_length, send_variable_length
-from socketing import TCP_IP, TCP_PORT
+from socketing import TCP_PORT
 from threading import Thread
 
 TCP_IP = 'localhost'
