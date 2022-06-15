@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import socket
 import cv2
 import numpy
@@ -10,18 +10,21 @@ sock = socket.socket()
 sock.connect((TCP_IP, TCP_PORT))
 
 capture = cv2.VideoCapture(0)
-ret, frame = capture.read()
+while capture.isOpened():
+  ret, frame = capture.read()
+  if(not ret or frame is None):
+    break
 
-encode_param = [int(cv2.IMWRITE_JPEG_QUALITY) ,90]
-result, imgencode = cv2.imencode('.jpg', frame, encode_param)
-data = numpy.array(imgencode)
-stringData = data.tobytes()
+  encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+  result, imgencode = cv2.imencode('.jpg', frame, encode_param)
+  data = numpy.array(imgencode)
+  stringData = data.tobytes()
+  sock.send(str(len(stringData)).encode('utf-8').ljust(16));
+  sock.send(stringData);
 
-sock.send(str(len(stringData)).encode('utf-8').ljust(16));
-sock.send(stringData);
 sock.close()
 
-decimg=cv2.imdecode(data,1)
-cv2.imshow('CLIENT',decimg)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+# decimg=cv2.imdecode(data,1)
+# cv2.imshow('CLIENT',decimg)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()

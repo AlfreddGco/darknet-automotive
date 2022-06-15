@@ -1,7 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 import socket
 import cv2
 import numpy
+import darknet as dn
+
+net = dn.load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
+meta = dn.load_meta(b"cfg/ois.data")
 
 def recvall(sock, count):
     buf = b''
@@ -20,12 +24,17 @@ s.bind((TCP_IP, TCP_PORT))
 s.listen(True)
 conn, addr = s.accept()
 
-length = recvall(conn,16)
-stringData = recvall(conn, int(length))
-data = numpy.frombuffer(stringData, dtype='uint8')
+while True:
+    length = recvall(conn, 16)
+    stringData = recvall(conn, int(length))
+    frame = numpy.frombuffer(stringData, dtype='uint8')
+    frame = cv2.imdecode(frame, 1)
+    img = dn.cv_img_to_darknet_img(frame)
+    r = dn.detect(net, meta, img)
+    print(r)
 s.close()
 
-decimg=cv2.imdecode(data,1)
-cv2.imshow('SERVER',decimg)
+decimg = cv2.imdecode(frame, 1)
+cv2.imshow('SERVER', decimg)
 cv2.waitKey(0)
 cv2.destroyAllWindows() 
