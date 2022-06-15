@@ -1,17 +1,9 @@
 from ctypes import *
-import math
-import random
-import time 
+import sys, time
+import cv2, pydash
+import numpy as np
+from imutils.video import FPS, FileVideoStream
 
-def sample(probs):
-    s = sum(probs)
-    probs = [a/s for a in probs]
-    r = random.uniform(0, 1)
-    for i in range(len(probs)):
-        r = r - probs[i]
-        if r <= 0:
-            return i
-    return len(probs)-1
 
 def c_array(ctype, values):
     arr = (ctype*len(values))()
@@ -43,6 +35,7 @@ class METADATA(Structure):
     _fields_ = [("classes", c_int),
                 ("names", POINTER(c_char_p))]
 
+    
 
 #lib = CDLL("/home/pjreddie/documents/darknet/libdarknet.so", RTLD_GLOBAL)
 lib = CDLL("./libdarknet.so", RTLD_GLOBAL)
@@ -118,7 +111,6 @@ predict_image = lib.network_predict_image
 predict_image.argtypes = [c_void_p, IMAGE]
 predict_image.restype = POINTER(c_float)
 
-
 def classify(net, meta, im):
     out = predict_image(net, im)
     res = []
@@ -141,7 +133,7 @@ def detect(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
         for i in range(meta.classes):
             if dets[j].prob[i] > 0:
                 b = dets[j].bbox
-                res.append((meta.names[i].decode(), dets[j].prob[i], (b.x, b.y, b.w, b.h)))
+                res.append((meta.names[i], dets[j].prob[i], (b.x, b.y, b.w, b.h)))
     res = sorted(res, key=lambda x: -x[1])
     out = []
     for detection in res:
@@ -156,14 +148,19 @@ def detect(net, meta, im, thresh=.5, hier_thresh=.5, nms=.45):
     return out
 
 
-def detect_from_file(net, meta, filename, thresh=.5, hier_thresh=.5, nms=.45):
-    im = load_image(filename, 0, 0)
-    return detect(net, meta, im, thresh, hier_thresh, nms)
-
-
+conversion_times = []
 #6.4ms on average for image with shape (416,416,3)
 def cv_img_to_darknet_img(img):
+    start = time.time()
     h, w, c = img.shape
+    gpu_frame = cv2.cuda_GpuMat(img)
+    gpu_frame = gpu_frame.transpose(2, 0, 1)[::-1]
+    gpu_frame = gpu_frame.astype(c_float)
+    gpu_frame = (gpu_frame / 255).flatten()
+    c_pointer = gpu_frame.ctypes.data_as(POINTER(c_float))
+    darknet_img = float_to_image(w, h, c, c_pointer)
+    conversion_times.append(time.time() - start)
+    return darknet_img
 
     img = img.transpose(2, 0, 1)[::-1]
     img = img.astype(c_float)
@@ -175,10 +172,36 @@ def cv_img_to_darknet_img(img):
     return darknet_img
 
 
-if __name__ == "__main__":
-    net = load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
-    meta = load_meta(b"cfg/ois.data")
-    start = time.time()
-    r = detect(net, meta, b"data/stop.jpg")
-    print(r)
-    print("Detection time: %.3f seconds" % (time.time() - start))
+def probability_filter(detections):
+    detections = pydash.arrays.uniq_by(detections, lambda x: x['label'])
+    filtered = []
+    THRESHOLDS = {
+        'Stop': 0.5,
+        'No speed limit': 0.75,
+        'Turn right': 0.55,
+        'Ahead only': 0.8,
+    }
+    for detection in detections:
+        if(detection['confidence'] >= THRESHOLDS[detection['label'].decode()]):
+            filtered.append(detection)
+    return filtered
+
+
+def resize_img(frame):
+    h = frame.shape[0]
+    frame = frame[h//3:]
+    fr = (frame.shape[0] // 2)
+    frame = np.concatenate((frame[:,:fr], frame[:,-fr:]), axis=1)
+    frame = cv2.resize(frame, (416, 416))
+    return frame
+
+
+net = load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
+meta = load_meta(b"cfg/ois.data")
+
+def detect(img):
+  img = resize_img(img)
+  img = cv_img_to_darknet_img(img)
+  r = detect(net, meta, img)
+  r = probability_filter(r)
+  return r
