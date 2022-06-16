@@ -61,7 +61,9 @@ if(__name__ == '__main__'):
   sock = socket.socket()
   sock.connect((TCP_IP, TCP_PORT))
   encoderStream = EncoderStream().start()
-  time.sleep(0.3)
+  while encoderStream.current_frame is None:
+      pass
+
   while encoderStream.running():
     encoded_frame = encoderStream.current_frame
     start = time.time()
