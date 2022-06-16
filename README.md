@@ -7,3 +7,15 @@ Darknet automotive is darknet specialized in autonomous driving machine learning
 
 # OIS dataset #
 OIS (Objects in Street) is a dataset built for traffic signs detection. I know, the name is dope. 
+
+
+## Detection server and client ##
+Run detection server:
+```
+python3 python/detection_server.py <port>
+```
+
+Run detection client:
+```
+python3 python/detection_client.py <server-ip> <port>
+```

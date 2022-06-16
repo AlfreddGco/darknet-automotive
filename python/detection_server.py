@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 import socket
-import cv2, json
+import sys, cv2, json
 import numpy as np
 import darknet as dn
 from socketing import recv_variable_length, send_variable_length
 from socketing import TCP_PORT
+
+if(len(sys.argv) > 1):
+  TCP_PORT = int(sys.argv[1])
 
 net = dn.load_net(b"cfg/ois.cfg", b"weights/ois_final.weights", 0)
 meta = dn.load_meta(b"cfg/ois.data")
