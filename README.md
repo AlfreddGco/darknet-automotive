@@ -19,3 +19,14 @@ Run detection client:
 ```
 python3 python/detection_client.py <server-ip> <port>
 ```
+
+## Streaming server and client ##
+Run streaming server:
+```
+python3 python/streaming_server.py <port>
+```
+
+Run streaming client:
+```
+python3 python/streaming_client.py <server-ip> <port>
+```
