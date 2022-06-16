@@ -5,7 +5,7 @@ TCP_PORT = 5001
 def recv_variable_length(socket):
     data = socket.recv(4)
     if(data == b''):
-        raise Exception('Connection closed by client')
+        raise EOFError('Connection closed by client')
     
     (msg,) = struct.unpack("i", data)
 
