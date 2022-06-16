@@ -16,7 +16,7 @@ def probability_filter(detections):
         'Ahead only': 0.8,
     }
     for detection in detections:
-        if(detection['confidence'] >= THRESHOLDS[detection['label'].decode()]):
+        if(detection['confidence'] >= THRESHOLDS[detection['label']]):
             filtered.append(detection)
     return filtered
 
