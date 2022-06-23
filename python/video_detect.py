@@ -38,9 +38,10 @@ if __name__ == "__main__":
     if(len(sys.argv) > 1):
         video_stream = FileVideoStream(sys.argv[1]).start()
     else:
-        video_stream = FileVideoStream('data/stop_video.mp4').start()
+        print('Usage: python3 python/video_detect.py <video_path>')
+        exit()
+
     time.sleep(1)
-    
     timer = FPS().start()
     while video_stream.more():
         frame = video_stream.read()

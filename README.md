@@ -9,6 +9,12 @@ Darknet automotive is darknet specialized in autonomous driving machine learning
 OIS (Objects in Street) is a dataset built for traffic signs detection. I know, the name is dope. 
 
 
+## Measure detection speed performance ##
+We made a python script to measure merely detection speed without the speed limitations of VideoCapture. This is because we couldn't find a correlation between image detection speed and video detection speed. We achieve this by using multithreading.
+```
+python3 python/video_detect.py <video_source>
+```
+
 ## Detection server and client ##
 Run detection server:
 ```
